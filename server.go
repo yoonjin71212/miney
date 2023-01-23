@@ -425,7 +425,7 @@ func GetConfig ( wr http.ResponseWriter , req *http.Request) {
 		}
     var info ContainerInfo
     json.Unmarshal(resp,info)
-    if(info.Username==user || authFlag) {
+    if(info.Username==user) {
         jsonList = append ( jsonList , string(resp) )
     }
 
