@@ -41,8 +41,8 @@ var portInt int64 = 25563
 var portIntonePlace int64 = 25563
 var ctx context.Context
 var tag string
-var password string = "Forest2301@#$"
-var ADMIN    string = "yjlee"
+var password string = "aa"
+var ADMIN    string = "aa"
 var ADDR string = "http://daegu.yjlee-dev.pe.kr"
 
 type UserInfo struct {
@@ -259,6 +259,10 @@ func CreateConfig (wr http.ResponseWriter , req *http.Request) {
       wr.Write( []byte("Unauthorized") )
       return
   }
+  if(flag) {
+      return
+  }
+  flag=true
   wr.Header().Set("Content-Type", "application/json; charset=utf-8")
   bytesGenerated , err := ioutil.ReadAll (req.Body)
   bytesGenerated = bytes.Replace( bytesGenerated , []byte("_") , []byte("-") , -1 )
@@ -327,8 +331,8 @@ func CreateConfig (wr http.ResponseWriter , req *http.Request) {
 
   string_Reply , err = json.Marshal (INFO)
 
-  if flag == false {
-  	flag = true
+  if flag == true {
+  	flag = false
   }
 
   wr.Write( string_Reply )
@@ -373,26 +377,16 @@ func DeleteFromListByValue(slice []int64, value int64) []int64 {
 func DeleteByTag ( wr http.ResponseWriter , req *http.Request) {
 
 
-  forTag, err := ioutil.ReadAll(req.Body)
-  if(err!=nil) {
-      return
-  }
+  forTag, _ := ioutil.ReadAll(req.Body)
   stringForTag := string(forTag)
   cmdDelete := exec.Command("/bin/bash","-c", "delete_container.sh "+stringForTag)
-  cur, err := ipCol.Find(context.Background(), bson.D{{}})
+  cur, _ := ipCol.Find(context.Background(), bson.D{{}})
 	for cur.Next(context.TODO()) {
-    resp , err := bson.MarshalExtJSON ( cur.Current , false , false )
-    if(err!=nil) {
-        return
-    }
+    resp , _ := bson.MarshalExtJSON ( cur.Current , false , false )
     var INFO ContainerInfo
     json.Unmarshal(resp,&INFO)
     if(INFO.TAG==stringForTag) {
-        p32, err := strconv.Atoi(INFO.Serverport)
-
-        if(err!=nil) {
-            return
-        }
+        p32, _ := strconv.Atoi(INFO.Serverport)
         p   := int64(p32)
         PORT_LIST = DeleteFromListByValue(PORT_LIST,p)
         ipCol.DeleteOne(context.Background(),cur.Current)
@@ -413,7 +407,7 @@ func DeleteByTag ( wr http.ResponseWriter , req *http.Request) {
 
 func GetConfig ( wr http.ResponseWriter , req *http.Request) {
 	user, pass, _ := req.BasicAuth()
-  authFlag =  !check(user,pass)
+  authFlag =  check(user,pass)
 	INFO.Serverip = SERVER_IP
   wr.Header().Set("Content-Type", "application/json; charset=utf-8")
   ioutil.ReadAll ( req.Body )
@@ -423,50 +417,25 @@ func GetConfig ( wr http.ResponseWriter , req *http.Request) {
 
 	var resp []byte
   cur, err := ipCol.Find(context.Background(), bson.D{{}})
-	jsonList := make ([]string , 0 , 100000)
-  passList := make([]string,0,500000)
+  jsonList := make ([]string , 0 , 100000)
+	passList := make ([]string , 0 , 1000000)
 	for cur.Next(context.TODO()) {
 		resp , err = bson.MarshalExtJSON ( cur.Current , false , false )
 		if err != nil {
 		    log.Println (err)
 		}
-    jsonList = append ( jsonList , string(resp) )
-    list := bytes.Trim(resp,",")
-    for instance := range list {
+    for instance := range bytes.Trim(resp,",") {
         passList = append(passList, string(instance))
     }
+    if(passList[7]!=user || !authFlag) {
+        jsonList = append ( jsonList , string(resp) )
+    }
+
 	}
 	if err != nil {
 	    log.Println (err)
 	}
-
-	jsonList = make ([]string , 0 , 100000)
-  passList = make([]string,0,500000)
-	for cur.Next(context.TODO()) {
-		resp , err = bson.MarshalExtJSON ( cur.Current , false , false )
-		if err != nil {
-		    log.Println (err)
-		}
-    jsonList = append ( jsonList , string(resp) )
-    list := bytes.Trim(resp,",")
-    for instance := range list {
-        passList = append(passList, string(instance))
-    }
-	}
 	resp , err = json.Marshal(jsonList)
-  if(authFlag ==false) {
-      if(botCheck(user,pass)) {
-          return
-      }
-      for index , b    := range passList {
-          if(index%12==8) {
-              if(passList[index-1] != user) {
-
-                resp      = bytes.Replace (resp, []byte(b), []byte  ("Unauthorized"), -1)
-              }
-          }
-      }
-  }
 
 	if err != nil {
 		log.Println (err)
