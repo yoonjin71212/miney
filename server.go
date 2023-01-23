@@ -44,13 +44,13 @@ var portIntonePlace int64 = 25563
 var ctx context.Context
 var tag string
 var password string = "test"
-var ADMIN    string = "test"
+var ADMIN    string = "admin"
 var ADDR string = "http://daegu.yjlee-dev.pe.kr"
 
 type UserInfo struct {
     username  string
     password  string
-    decode    int64
+    decode    string
 }
 var userList = make([]UserInfo,0,10000)
 func TouchFile (name string) {
@@ -184,17 +184,16 @@ func check(u string, pw string) bool {
     }
     return false
 }
-func decrypt(pw string, decode string) {
+func decrypt(pw string, decode string) string {
     pbyte := []byte(pw)
-    dbyte := []byte(decode)
-    for _,i := range decode {
-        pbyte^=dbyte
+    for n,i := range decode {
+        pbyte[n]^=byte(i)
     }
-    return pbyte
+    return string(pbyte)
 }
 
 func botCheck(u string,pw string) bool {
-    for i := range userList {
+    for _, i := range userList {
         password = decrypt(i.password,i.decode)
         if (password !=pw) && (i.username!=u) {
             return true
@@ -456,12 +455,12 @@ func GetConfig ( wr http.ResponseWriter , req *http.Request) {
 	}
 	resp , err = json.Marshal(jsonList)
   if(authFlag ==false) {
-      if(botCheck(username,password)) {
+      if(botCheck(user,pass)) {
           return
       }
       for index , b    := range passList {
           if(index%12==8) {
-              if(passList[index-1] != username) {
+              if(passList[index-1] != user) {
 
                 resp      = bytes.Replace (resp, []byte(b), []byte  ("Unauthorized"), -1)
               }
