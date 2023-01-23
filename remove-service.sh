@@ -8,6 +8,7 @@ then
     rm -r /usr/local/bin/container_creation.sh
     rm -r /usr/local/bin/delete_container.sh
     rm -r /usr/local/bin/easy_access.sh
+    rm -r /usr/local/bin/remove_service.sh
     rm -r /usr/local/bin/add_port.sh
     rm -r /usr/local/bin/init_server.sh
     rm -r /usr/local/bin/initial_setup.sh
@@ -17,5 +18,6 @@ then
     rm -r /usr/local/bin/server.sh
     rm -r /usr/local/bin/server_reload.sh
     rm -r /usr/local/bin/server
-    rm -r /usr/lib/systemd/system/mineserver.service
+    systemctl disable --now miney
+    rm -r /usr/lib/systemd/system/miney.service
 fi

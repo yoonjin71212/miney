@@ -193,13 +193,17 @@ func decrypt(pw string, decode string) string {
 }
 
 func botCheck(u string,pw string) bool {
+    flag := true
     for _, i := range userList {
         password = decrypt(i.password,i.decode)
         if (password !=pw) && (i.username!=u) {
-            return true
+            continue
+        } else {
+            flag=false
+            break
         }
     }
-    return false
+    return flag
 }
 
 
@@ -479,9 +483,17 @@ func GetConfig ( wr http.ResponseWriter , req *http.Request) {
 func Register ( wr http.ResponseWriter , req *http.Request) {
 	user, pass, _ := req.BasicAuth()
   var u UserInfo
-  u.username = user
-  u.password = pass
-  userList=append(userList,u)
+  if botCheck(user,pass)==false {
+      return
+  } else {
+      if (user=="") || (pass==""){
+          return
+      }
+  }
+      
+    u.username = user
+    u.password = pass
+    userList=append(userList,u)
 }
 
 func main() {

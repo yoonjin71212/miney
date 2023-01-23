@@ -1,6 +1,6 @@
 if [ $(whoami) = "root" ]
 then
-    cp -r mineserver.service /usr/lib/systemd/system/mineserver.service
+    cp -r miney.service /usr/lib/systemd/system/miney.service
     cd ..
     rm -r /usr/local/bin/minecraft
     rm -r /usr/local/bin/apply_nginx.sh
@@ -11,6 +11,7 @@ then
     rm -r /usr/local/bin/easy_access.sh
     rm -r /usr/local/bin/add_port.sh
     rm -r /usr/local/bin/init_server.sh
+    rm -r /usr/local/bin/remove-service.sh
     rm -r /usr/local/bin/initial_setup.sh
     rm -r /usr/local/bin/install_svc.sh
     rm -r /usr/local/bin/kill.sh
@@ -24,8 +25,8 @@ then
     ln -s /usr/local/bin/minecraft/*.sh /usr/local/bin
     ln -s /usr/local/bin/minecraft/server /usr/local/bin
     systemctl daemon-reload
-    systemctl enable --now mineserver
-    systemctl start  --now mineserver
+    systemctl enable --now miney
+    systemctl start  --now miney
     echo "Done"
 else
     sudo -s

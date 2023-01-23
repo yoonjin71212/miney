@@ -1,0 +1,11 @@
+[Unit]
+Description=MineCraft DaaS Service
+
+[Service]
+Type=forking
+ExecStart=/usr/local/bin/minecraft/server.sh
+ExecReload=/usr/local/bin/minecraft/server_reload.sh
+ExecStop=/usr/local/bin/minecraft/kill.sh
+
+[Install]
+WantedBy=multi-user.target
