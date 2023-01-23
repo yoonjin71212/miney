@@ -283,6 +283,9 @@ func CreateConfig (wr http.ResponseWriter , req *http.Request) {
   log.Println ("/container_creation.sh " + tag + " " + port)
   portprev = port
   bytesGenerated = Generate_ConfigFile (bytesGenerated)
+  if flag == true {
+  	flag = false
+  }
 
   TouchFile (mydir+"/properties/"+tag+".properties")
   file , _ := os.OpenFile ( mydir+"/properties/"+tag+".properties" , os.O_RDWR  , os.FileMode(0777))
@@ -331,9 +334,6 @@ func CreateConfig (wr http.ResponseWriter , req *http.Request) {
 
   string_Reply , err = json.Marshal (INFO)
 
-  if flag == true {
-  	flag = false
-  }
 
   wr.Write( string_Reply )
 }
@@ -427,7 +427,7 @@ func GetConfig ( wr http.ResponseWriter , req *http.Request) {
     for instance := range bytes.Trim(resp,",") {
         passList = append(passList, string(instance))
     }
-    if(passList[7]!=user || !authFlag) {
+    if(passList[5]==user || authFlag) {
         jsonList = append ( jsonList , string(resp) )
     }
 
