@@ -1,7 +1,7 @@
 package main
 import (
         "encoding/json"
-	      "sync"
+        "encoding/base64"
         "fmt"
         "log"
         crand "crypto/rand"
@@ -20,11 +20,9 @@ import (
         "context"
         "bytes"
 )
-var mtx sync.Mutex
 var ePlace int64
 var SERVER_IP = os.Args[1] 
 var PORT_LIST = make([]int64,0,100000)
-var mtx_Flag bool = false
 var flag   bool
 var authFlag bool = false
 var flags MCFlags
@@ -43,14 +41,13 @@ var portInt int64 = 25563
 var portIntonePlace int64 = 25563
 var ctx context.Context
 var tag string
-var password string = "test"
-var ADMIN    string = "admin"
+var password string = "Forest2301@#$"
+var ADMIN    string = "yjlee"
 var ADDR string = "http://daegu.yjlee-dev.pe.kr"
 
 type UserInfo struct {
     username  string
     password  string
-    decode    string
 }
 var userList = make([]UserInfo,0,10000)
 func TouchFile (name string) {
@@ -184,26 +181,20 @@ func check(u string, pw string) bool {
     }
     return false
 }
-func decrypt(pw string, decode string) string {
-    pbyte := []byte(pw)
-    for n,i := range decode {
-        pbyte[n]^=byte(i)
-    }
-    return string(pbyte)
+func decrypt(pw string) string {
+    str, _ := base64.StdEncoding.DecodeString(pw)
+    return string(str)
 }
 
 func botCheck(u string,pw string) bool {
-    flag := true
     for _, i := range userList {
-        password = decrypt(i.password,i.decode)
-        if (password !=pw) && (i.username!=u) {
-            continue
-        } else {
-            flag=false
-            break
+        password = decrypt(i.password)
+        if (password ==pw) && (i.username==u) {
+            return false
         }
+        
     }
-    return flag
+    return true
 }
 
 
@@ -262,8 +253,12 @@ func Generate_ConfigFile ( bytesGenerated []byte ) []byte {
 
 func CreateConfig (wr http.ResponseWriter , req *http.Request) {
 
-	mtx_Flag = true
 
+	user, pass, _ := req.BasicAuth()
+  if botCheck(user,pass) == true {
+      wr.Write( []byte("Unauthorized") )
+      return
+  }
   wr.Header().Set("Content-Type", "application/json; charset=utf-8")
   bytesGenerated , err := ioutil.ReadAll (req.Body)
   bytesGenerated = bytes.Replace( bytesGenerated , []byte("_") , []byte("-") , -1 )
@@ -278,6 +273,7 @@ func CreateConfig (wr http.ResponseWriter , req *http.Request) {
   mydir  := "/usr/local/bin/minecraft"
   tag=get_TAG(mydir)
   if(port==portprev) {
+      wr.Write( []byte("Unauthorized") )
       return
   }
   log.Println ("/container_creation.sh " + tag + " " + port)
@@ -482,27 +478,21 @@ func GetConfig ( wr http.ResponseWriter , req *http.Request) {
 
 func Register ( wr http.ResponseWriter , req *http.Request) {
 	user, pass, _ := req.BasicAuth()
+  pass =base64.StdEncoding.EncodeToString([]byte(pass))
   var u UserInfo
-  if botCheck(user,pass)==false {
-      return
-  } else {
-      if (user=="") || (pass==""){
-          return
-      }
-  }
-      
-    u.username = user
-    u.password = pass
-    userList=append(userList,u)
+  u.username = user
+  u.password = pass
+  userList=append(userList,u)
+  println("Registered one User")
 }
 
 func main() {
         route = mux.NewRouter()
-        route.HandleFunc  ("/register", Register).Methods("POST")
+        route.HandleFunc  ("/register", Register).Methods("GET")
         route.HandleFunc ( "/create" , CreateConfig).Methods("POST")
         route.HandleFunc ( "/request" ,GetConfig).Methods("GET")
         route.HandleFunc ( "/delete" , DeleteByTag).Methods("POST")
-        clientOptions := options.Client().ApplyURI ("mongodb://localhost:27017")
+        clientOptions := options.Client().ApplyURI ("mongodb://localhost:19999")
         client , _ := mongo.Connect (context.TODO() , clientOptions)
         clientIP , _ := mongo.Connect (context.TODO() , clientOptions)
         ctx, _ = context.WithCancel(context.Background())

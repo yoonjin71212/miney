@@ -1,2 +1,2 @@
-systemctl stop --now mineserver.service
-systemctl start --now mineserver.service
+systemctl stop --now miney.service
+systemctl start --now miney.service
