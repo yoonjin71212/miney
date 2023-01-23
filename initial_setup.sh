@@ -53,7 +53,7 @@ if [ $OPTION = "--reconfigure-lxd" ]
 then
 	apt-get -y install nginx
 	systemctl enable nginx
-	lxd init --auto
+	lxd init
 fi
 NET_INTERFACE="$(ip route get 1 | awk '{print $5}')"
 lxc profile device set default $NET_INTERFACE nictype bridged
