@@ -254,7 +254,8 @@ func Generate_ConfigFile ( bytesGenerated []byte ) []byte {
 func CreateConfig (wr http.ResponseWriter , req *http.Request) {
 
 
-	user, pass, _ := req.BasicAuth()
+	user, pass, _  := req.BasicAuth()
+  INFO.Username = user
   if botCheck(user,pass) == true {
       wr.Write( []byte("Unauthorized") )
       return
@@ -406,8 +407,11 @@ func DeleteByTag ( wr http.ResponseWriter , req *http.Request) {
 }
 
 func GetConfig ( wr http.ResponseWriter , req *http.Request) {
-	user, pass, _ := req.BasicAuth()
+	user, pass, ok := req.BasicAuth()
   authFlag =  check(user,pass)
+  if(!ok||!authFlag) {
+      return
+  }
 	INFO.Serverip = SERVER_IP
   wr.Header().Set("Content-Type", "application/json; charset=utf-8")
   ioutil.ReadAll ( req.Body )
