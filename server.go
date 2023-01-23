@@ -418,16 +418,14 @@ func GetConfig ( wr http.ResponseWriter , req *http.Request) {
 	var resp []byte
   cur, err := ipCol.Find(context.Background(), bson.D{{}})
   jsonList := make ([]string , 0 , 100000)
-	passList := make ([]string , 0 , 1000000)
 	for cur.Next(context.TODO()) {
 		resp , err = bson.MarshalExtJSON ( cur.Current , false , false )
 		if err != nil {
 		    log.Println (err)
 		}
-    for instance := range bytes.Trim(resp,",") {
-        passList = append(passList, string(instance))
-    }
-    if(passList[5]==user || authFlag) {
+    var info ContainerInfo
+    json.Unmarshal(resp,info)
+    if(info.Username==user || authFlag) {
         jsonList = append ( jsonList , string(resp) )
     }
 
