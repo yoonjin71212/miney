@@ -47,28 +47,28 @@ class Miney_Client(GridLayout):
     def syncOnclick(self,instance):
 
         self.sel = -1
-            
-        if len(self.btnarr)!=0:
+        if self.i != -1 :
             for btn in  self.btnarr: 
-                wid =     btn
+                if type(btn) == type (None) :
+                    break
+                wid = btn
                 wid.parent.remove_widget(wid)
-                self.btnarr.remove(btn)
-        response     = requests.post('http://daegu.yjlee-dev.pe.kr:32000/request',json = {"username":self.username.text, "password":self.password.text}, timeout = 10).json()
-        print(response)
-        if len(response)==0 :
-            return
-        for resp     in response:
-            self.    i+=1
-            resp     = json.loads(resp,strict=False)
-            self.    tag.append(resp)
-            self.    seltagArr.append(resp.get("tag"))
-            self.    tmp = globals()['self.btn{}'.format(self.i)]=Button(text="Select "+ self.tag[self.i].get("servername")+":"+"(Port:" +self.tag[self.i].get("serverport")+")"+ " Now",size_hint=(.7,.7))
-            self.    ids["tag"]=self.seltagArr[self.i]
-            self.    tmp.bind(on_press = self.onSelectPress)
-            self.    btnarr.append(self.tmp)
-            self.    layout.add_widget(self.tmp)
-            self.btn_delete.bind(on_press=self.onDeletePress)
-
+            response = requests.post('http://daegu.yjlee-dev.pe.kr:32000/request',json = {"username":self.username.text, "password":self.password.text}, timeout = 10).json()
+            print(response)
+            if len(response)==0 :
+                return
+            for resp in response:
+                self.i+=1
+                resp = json.loads(resp,strict=False)
+                self.tag.append(resp)
+                self.seltagArr.append(resp.get("tag"))
+                self.tmp = globals()['self.btn{}'.format(self.i)]=Button(text="Select "+ self.tag[self.i].get("servername")+":"+"(Port:" +self.tag[self.i].get("serverport")+")"+ " Now",size_hint=(.7,.7))
+                self.ids["tag"]=self.seltagArr[self.i]
+                self.tmp.bind(on_press = self.onSelectPress)
+                self.btnarr.append(self.tmp)
+                self.layout.add_widget(self.tmp)
+                self.btn_delete.bind(on_press=self.onDeletePress)
+    
     def onCreatePress(self,instance):
         try:
             if self.spinlock:
