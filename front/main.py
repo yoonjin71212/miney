@@ -1,4 +1,5 @@
 from kivy.app import App
+from base64 import b64encode
 import ast
 import requests
 from kivy.uix.gridlayout import GridLayout
@@ -42,25 +43,29 @@ class Miney_Client(GridLayout):
         self.r = Button(text="Register",size_hint=(.7,.7))
         self.r.bind(on_press=self.register)
         self.layout.add_widget(self.r)
+
     def syncOnclick(self,instance):
-        try:
-            response = requests.get('http://daegu.yjlee-dev.pe.kr:32000/request?'+username+'&'+password+'&', timeout = 1).text
-            if len(response):
-                response = json.loads(response)
-            for resp in response:
-                self.i+=1
-                resp = str(resp)
-                resp = json.loads(resp,strict=False)
-                self.tag.append(resp)
-                self.seltagArr.append(resp.get("tag"))
-                self.tmp = globals()['self.btn{}'.format(self.i)]=Button(text="Select "+ self.tag[self.i].get("servername")+":"+"(Port:" +self.tag[self.i].get("serverport")+")"+ " Now",size_hint=(.7,.7))
-                self.ids["tag"]=self.seltagArr[self.i]
-                self.tmp.bind(on_press = self.onSelectPress)
-                self.btnarr.append(self.tmp)
-                self.layout.add_widget(self.tmp)
-                self.btn_delete.bind(on_press=self.onDeletePress)
-        except:
-            print("no json")
+
+        self.sel = -1
+        for btn in  self.btnarr: 
+                       
+            wid = btn
+            wid.parent.remove_widget(wid)
+        response = requests.post('http://daegu.yjlee-dev.pe.kr:32000/request',json = {"username":self.username.text, "password":self.password.text}, timeout = 10).json()
+        print(response)
+        if len(response)==0 :
+            return
+        for resp in response:
+            self.i+=1
+            resp = json.loads(resp,strict=False)
+            self.tag.append(resp)
+            self.seltagArr.append(resp.get("tag"))
+            self.tmp = globals()['self.btn{}'.format(self.i)]=Button(text="Select "+ self.tag[self.i].get("servername")+":"+"(Port:" +self.tag[self.i].get("serverport")+")"+ " Now",size_hint=(.7,.7))
+            self.ids["tag"]=self.seltagArr[self.i]
+            self.tmp.bind(on_press = self.onSelectPress)
+            self.btnarr.append(self.tmp)
+            self.layout.add_widget(self.tmp)
+            self.btn_delete.bind(on_press=self.onDeletePress)
 
     def onCreatePress(self,instance):
         try:
@@ -75,7 +80,7 @@ class Miney_Client(GridLayout):
             self.name = self.deskname.text
             password = self.password.text
             username = self.username.text
-            r = requests.post ('http://daegu.yjlee-dev.pe.kr:32000/create', json = { "server-name" : self.name, "gamemode" : "creative", "force-gamemode" : True, "difficulty" : "easy", "allow-cheat" : True, "max-players" : 100, "online-mode" : True, "white-list" : False, "server-port" : 19132, "server-portv6" : 19133, "view-distance" : 32, "tick-distance" : 4, "player-idle-timeout" : 30, "max-threads" : 8, "level-name" : "Bedrock level", "level-seed" : "MineCraftX", "default-player-permission-level" : "operator", "texturepack-required" : False, "content-log-file-enabled" : True, "compression-threshold" : 20, "server-authoritative-movement" : "server-auth", "player-movement-score-threshold" : 0.85, "player-movement-distance-threshold" : 0.7, "player-movement-duration-threshold-in-ms" : 500, "correct-player-movement" : True, "server-authoritative-block-breaking" : True }, auth = (password,username))
+            r = requests.post ('http://daegu.yjlee-dev.pe.kr:32000/create', json = { "server-name" : self.name, "gamemode" : "creative", "force-gamemode" : True, "difficulty" : "easy", "allow-cheat" : True, "max-players" : 100, "online-mode" : True, "white-list" : False, "server-port" : 19132, "server-portv6" : 19133, "view-distance" : 32, "tick-distance" : 4, "player-idle-timeout" : 30, "max-threads" : 8, "level-name" : "Bedrock level", "level-seed" : "MineCraftX", "default-player-permission-level" : "operator", "texturepack-required" : False, "content-log-file-enabled" : True, "compression-threshold" : 20, "server-authoritative-movement" : "server-auth", "player-movement-score-threshold" : 0.85, "player-movement-distance-threshold" : 0.7, "player-movement-duration-threshold-in-ms" : 500, "correct-player-movement" : True, "server-authoritative-block-breaking" : True }, auth = (username,password))
             resp = globals()['jsondata'.format(self.i)]=r.json()
             self.tag.append(resp)
             self.seltagArr.append(resp.get("tag"))
@@ -92,7 +97,7 @@ class Miney_Client(GridLayout):
     def register(self,instance):
             username = self.username.text
             password = self.password.text
-            r = requests.get ('http://daegu.yjlee-dev.pe.kr:32000/register', auth = (password,username))
+            r = requests.get ('http://daegu.yjlee-dev.pe.kr:32000/register', auth = (username,password))
         
     def onDeletePress(self,instance):
         if self.spinlock:
@@ -119,4 +124,3 @@ class Miney_App(App):
 
 Miney_App().build()
 Miney_App().run()
-
