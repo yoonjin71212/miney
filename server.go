@@ -431,7 +431,7 @@ func GetConfig ( wr http.ResponseWriter , req *http.Request) {
 		if err != nil {
 		    log.Println (err)
 		}
-    var info ContainerInfo
+    var info UserInfo
     json.Unmarshal(resp,&info)
     if(info.Username==in.Username && info.Password==in.Password) {
         jsonList = append ( jsonList , string(resp) )
