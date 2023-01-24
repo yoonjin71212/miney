@@ -187,7 +187,7 @@ func decrypt(pw string) string {
 }
 
 func botCheck(u string,pw string) bool {
-    cur, _ := ipCol.Find(context.Background(), bson.D{{}})
+    cur, _ := UserCol.Find(context.Background(), bson.D{{}})
 	      for cur.Next(context.TODO()) {
             current , _ = bson.MarshalExtJSON( cur.Current , false , false )
             var i UserInfo
