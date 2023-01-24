@@ -36,20 +36,19 @@ var current_Config []byte
 var buf bytes.Buffer
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890"
 var col *mongo.Collection
-var ipCol *mongo.Collection
+var ipCol , UserCol *mongo.Collection
 var portInt int64 = 25563
 var portIntonePlace int64 = 25563
 var ctx context.Context
 var tag string
-var password string = "aa"
-var ADMIN    string = "aa"
+var password string = "a$$"
+var ADMIN    string = "k1$$MY"
 var ADDR string = "http://daegu.yjlee-dev.pe.kr"
 
 type UserInfo struct {
-    username  string
-    password  string
+    Username  string `json:"username"`
+    Password  string `json:"password"`
 }
-var userList = make([]UserInfo,0,10000)
 func TouchFile (name string) {
         file , _ := os.OpenFile(name , os.O_RDONLY|os.O_CREATE , 0644)
         file.Close()
@@ -57,6 +56,7 @@ func TouchFile (name string) {
 type ContainerInfo struct {
 	Servername string `json:"servername"`
   Username   string `json:"username"`
+  Password   string `json:"password"`
   TAG        string `json:"tag"`
   Serverip string `json:"serverip"`
 	Serverport string `json:"serverport"`
@@ -187,11 +187,15 @@ func decrypt(pw string) string {
 }
 
 func botCheck(u string,pw string) bool {
-    for _, i := range userList {
-        password = decrypt(i.password)
-        if (password ==pw) && (i.username==u) {
-            return false
-        }
+    cur, _ := ipCol.Find(context.Background(), bson.D{{}})
+	      for cur.Next(context.TODO()) {
+            current , _ = bson.MarshalExtJSON( cur , false , false )
+            var i UserInfo
+            json.Unmarshal(current,&i)
+            password = decrypt(i.Password)
+            if (password ==pw) && (i.Username==u) {
+                return false
+            }
         
     }
     return true
@@ -256,10 +260,12 @@ func CreateConfig (wr http.ResponseWriter , req *http.Request) {
 
 	user, pass, _  := req.BasicAuth()
   INFO.Username = user
-  if botCheck(user,pass) == true {
-      wr.Write( []byte("Unauthorized") )
-      return
-  }
+  INFO.Password = pass
+  
+    if botCheck(user,pass) == true {
+        wr.Write( []byte("Unauthorized") )
+        return
+    }
   if(flag) {
       return
   }
@@ -278,7 +284,7 @@ func CreateConfig (wr http.ResponseWriter , req *http.Request) {
   mydir  := "/usr/local/bin/minecraft"
   tag=get_TAG(mydir)
   if(port==portprev) {
-      wr.Write( []byte("Unauthorized") )
+      fmt.Fprintf(wr, "Unauthorized")
       return
   }
   log.Println ("/container_creation.sh " + tag + " " + port)
@@ -407,17 +413,15 @@ func DeleteByTag ( wr http.ResponseWriter , req *http.Request) {
 }
 
 func GetConfig ( wr http.ResponseWriter , req *http.Request) {
-	user, pass, ok := req.BasicAuth()
-  authFlag =  check(user,pass)
-  if(!ok||!authFlag) {
-      return
-  }
 	INFO.Serverip = SERVER_IP
   wr.Header().Set("Content-Type", "application/json; charset=utf-8")
-  ioutil.ReadAll ( req.Body )
+  read,_:=ioutil.ReadAll ( req.Body )
 	if f, ok := wr.(http.Flusher); ok { 
 		f.Flush() 
 	}
+
+  var in UserInfo
+  json.Unmarshal(read,&in)
 
 	var resp []byte
   cur, err := ipCol.Find(context.Background(), bson.D{{}})
@@ -428,8 +432,8 @@ func GetConfig ( wr http.ResponseWriter , req *http.Request) {
 		    log.Println (err)
 		}
     var info ContainerInfo
-    json.Unmarshal(resp,info)
-    if(info.Username==user) {
+    json.Unmarshal(resp,&info)
+    if(info.Username==in.Username && info.Password==in.Password) {
         jsonList = append ( jsonList , string(resp) )
     }
 
@@ -443,7 +447,7 @@ func GetConfig ( wr http.ResponseWriter , req *http.Request) {
 		log.Println (err)
 	}
 
-	wr.Write(resp) 
+	fmt.Fprintf(wr,string(resp))
 
 }
 
@@ -451,9 +455,9 @@ func Register ( wr http.ResponseWriter , req *http.Request) {
 	user, pass, _ := req.BasicAuth()
   pass =base64.StdEncoding.EncodeToString([]byte(pass))
   var u UserInfo
-  u.username = user
-  u.password = pass
-  userList=append(userList,u)
+  u.Username = user
+  u.Password = pass
+  UserCol.InsertOne(ctx , u)
   println("Registered one User")
 }
 
@@ -461,7 +465,7 @@ func main() {
         route = mux.NewRouter()
         route.HandleFunc  ("/register", Register).Methods("GET")
         route.HandleFunc ( "/create" , CreateConfig).Methods("POST")
-        route.HandleFunc ( "/request" ,GetConfig).Methods("GET")
+        route.HandleFunc ( "/request" ,GetConfig).Methods("POST")
         route.HandleFunc ( "/delete" , DeleteByTag).Methods("POST")
         clientOptions := options.Client().ApplyURI ("mongodb://localhost:19999")
         client , _ := mongo.Connect (context.TODO() , clientOptions)
@@ -469,6 +473,7 @@ func main() {
         ctx, _ = context.WithCancel(context.Background())
         col    = client.Database("MC_Json").Collection("Flag Collections")
         ipCol  = clientIP.Database("MC_IP").Collection("IP Collections")
+        UserCol  = clientIP.Database("MC_USER").Collection("User Collections")
         log.Println(http.ListenAndServe(":32000" , route))
 
 }

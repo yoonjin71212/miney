@@ -7,14 +7,15 @@ db.getCollectionNames()
   });
 db.createUser(
   {
-    user: "mongod",
-    pwd: "mongod", 
+    user: "yjlee",
+    pwd: "Forest2301@#$", 
     roles: [
 			{ role: 
 				"readWrite",
 				db:	"MC_Json",
 				db:	"MC_IP",
-			        db:	"admin"
+				db:	"MC_USER",
+			  db:	"admin"
 			}
 		]
   }

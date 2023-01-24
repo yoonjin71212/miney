@@ -1,5 +1,5 @@
 PORT="$1"
-CONTAINER_IP-"$2"
+CONTAINER_IP="$2"
 tail -n 1 /etc/nginx/nginx.conf | wc -c | xargs -I {} truncate /etc/nginx/nginx.conf -s -{}
 echo "
 	server {
