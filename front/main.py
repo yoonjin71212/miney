@@ -54,6 +54,7 @@ class Miney_Client(GridLayout):
         for resp in response:
             resp = json.loads(resp,strict=False)
             if resp not in self.tag:
+                self.i+=1
                 self.tag.append(resp)
                 self.seltagArr.append(resp.get("tag"))
                 self.tmp = globals()['self.btn{}'.format(self.i)]=Button(text="Select "+ self.tag[self.i].get("servername")+":"+"(Port:" +self.tag[self.i].get("serverport")+")"+ " Now",size_hint=(.7,.7))
