@@ -1,0 +1,8 @@
+bedrock*
+structures
+definitions
+*packs
+*.deb*
+*buildozer*
+*.txt
+properties
