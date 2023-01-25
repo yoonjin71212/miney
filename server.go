@@ -399,7 +399,7 @@ func DeleteByTag ( wr http.ResponseWriter , req *http.Request) {
         ipCol.DeleteOne(context.Background(),cur.Current)
         portIntonePlace = p
         ePlace += 1
-        cmdDelete = exec.Command("/bin/bash","-c", "add_port.sh ",strconv.Itoa(int(p)),INFO.Serverip)
+        cmdDelete = exec.Command("/bin/bash","-c", "add_port.sh",INFO.Serverport,INFO.Serverip)
         cmdDelete.Stdout = os.Stdout 
         cmdDelete.Stderr = os.Stderr
         cmdDelete.Start()
