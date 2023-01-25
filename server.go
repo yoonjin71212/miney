@@ -41,8 +41,8 @@ var portInt int64 = 25563
 var portIntonePlace int64 = 25563
 var ctx context.Context
 var tag string
-var password string = "a$$"
-var ADMIN    string = "k1$$MY"
+var password string = "h013"
+var ADMIN    string = "4$$"
 var ADDR string = "http://daegu.yjlee-dev.pe.kr"
 
 type UserInfo struct {
@@ -187,9 +187,9 @@ func decrypt(pw string) string {
 }
 
 func botCheck(u string,pw string) bool {
-    cur, _ := ipCol.Find(context.Background(), bson.D{{}})
+    cur, _ := UserCol.Find(context.Background(), bson.D{{}})
 	      for cur.Next(context.TODO()) {
-            current , _ = bson.MarshalExtJSON( cur , false , false )
+            current , _ = bson.MarshalExtJSON( cur.Current , false , false )
             var i UserInfo
             json.Unmarshal(current,&i)
             password = decrypt(i.Password)
@@ -392,14 +392,14 @@ func DeleteByTag ( wr http.ResponseWriter , req *http.Request) {
     resp , _ := bson.MarshalExtJSON ( cur.Current , false , false )
     var INFO ContainerInfo
     json.Unmarshal(resp,&INFO)
-    if(INFO.TAG==stringForTag) {
+    if(INFO.TAG!=stringForTag) {
         p32, _ := strconv.Atoi(INFO.Serverport)
-        p   := int64(p32)
+        p      := int64(p32)
         PORT_LIST = DeleteFromListByValue(PORT_LIST,p)
         ipCol.DeleteOne(context.Background(),cur.Current)
         portIntonePlace = p
         ePlace += 1
-        cmdDelete = exec.Command("/bin/bash","-c", "add_port.sh ",strconv.Itoa(int(p)),INFO.Serverip)
+        cmdDelete = exec.Command("/bin/bash","-c", "add_port.sh",INFO.Serverport,INFO.Serverip)
         cmdDelete.Stdout = os.Stdout 
         cmdDelete.Stderr = os.Stderr
         cmdDelete.Start()
@@ -411,7 +411,6 @@ func DeleteByTag ( wr http.ResponseWriter , req *http.Request) {
   cmdDelete.Start()
   cmdDelete.Wait()
 }
-
 func GetConfig ( wr http.ResponseWriter , req *http.Request) {
 	INFO.Serverip = SERVER_IP
   wr.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -422,7 +421,6 @@ func GetConfig ( wr http.ResponseWriter , req *http.Request) {
 
   var in UserInfo
   json.Unmarshal(read,&in)
-
 	var resp []byte
   cur, err := ipCol.Find(context.Background(), bson.D{{}})
   jsonList := make ([]string , 0 , 100000)
@@ -431,7 +429,7 @@ func GetConfig ( wr http.ResponseWriter , req *http.Request) {
 		if err != nil {
 		    log.Println (err)
 		}
-    var info ContainerInfo
+    var info UserInfo
     json.Unmarshal(resp,&info)
     if(info.Username==in.Username && info.Password==in.Password) {
         jsonList = append ( jsonList , string(resp) )
@@ -458,7 +456,7 @@ func Register ( wr http.ResponseWriter , req *http.Request) {
   u.Username = user
   u.Password = pass
   UserCol.InsertOne(ctx , u)
-  println("Registered one User")
+  fmt.Fprintf(wr,"Registered User")
 }
 
 func main() {
@@ -467,7 +465,7 @@ func main() {
         route.HandleFunc ( "/create" , CreateConfig).Methods("POST")
         route.HandleFunc ( "/request" ,GetConfig).Methods("POST")
         route.HandleFunc ( "/delete" , DeleteByTag).Methods("POST")
-        clientOptions := options.Client().ApplyURI ("mongodb://localhost:19999")
+        clientOptions := options.Client().ApplyURI ("mongodb://localhost:27017")
         client , _ := mongo.Connect (context.TODO() , clientOptions)
         clientIP , _ := mongo.Connect (context.TODO() , clientOptions)
         ctx, _ = context.WithCancel(context.Background())

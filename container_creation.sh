@@ -58,8 +58,10 @@ echo "
 nginx -s reload
 echo -n "CURRENT IP:"
 echo $CONTAINER_IP
-lxc file push -r /usr/local/bin/minecraft/ $TAG/
+lxc file push -r /usr/local/bin/minecraft/miney.zip $TAG/
 lxc exec $TAG -- /bin/apt install -y unzip
+lxc exec $TAG -- /bin/unzip /miney.zip 
+lxc exec $TAG -- /usr/bin/mv    miney /minecraft
 lxc exec $TAG -- /bin/mkdir /minecraft/properties
 touch /usr/local/bin/minecraft/container/$TAG
 echo $CONTAINER_IP > /usr/local/bin/minecraft/container/$TAG

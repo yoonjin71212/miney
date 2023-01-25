@@ -10,11 +10,15 @@ sleep  0.5
 if [ $(whoami) = "root" ]
 then
 		echo "Already admin! Entering setup.."
+    echo "Be sure to locate your minecraft ZIP"
 else
 		echo "Please enter your password to switch to root"
 		sudo -s
 fi
 sleep 1
+cd ..
+zip miney.zip miney -r
+cd miney
 apt-get update -y
 release="jammy"
 curl -fsSL https://www.mongodb.org/static/pgp/server-6.0.asc|sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/mongodb-6.gpg
@@ -62,7 +66,7 @@ INTERFACE_NAME=$(ip route get 1 | awk '{print $5}')
 IP_ADDRESS=$(ip route get 1 | awk '{print $7}')
 
 sleep 2
-cat mongo.props | mongosh --port 19999
+cat mongo.props | mongosh --port 27017
 
 #systemctl stop --now dnsmasq
 #systemctl disable dnsmasq

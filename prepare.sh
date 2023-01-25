@@ -1,6 +1,8 @@
 #!/bin/bash
 apt-get update -y
 apt-get install -y sshpass
+cd /
+mv miney minecraft
 cd /minecraft
 unzip *.zip
 cd properties
