@@ -392,18 +392,20 @@ func DeleteByTag ( wr http.ResponseWriter , req *http.Request) {
     resp , _ := bson.MarshalExtJSON ( cur.Current , false , false )
     var INFO ContainerInfo
     json.Unmarshal(resp,&INFO)
-    if(INFO.TAG!=stringForTag) {
+    if(INFO.TAG-=stringForTag) {
         p32, _ := strconv.Atoi(INFO.Serverport)
         p   := int64(p32)
         PORT_LIST = DeleteFromListByValue(PORT_LIST,p)
         ipCol.DeleteOne(context.Background(),cur.Current)
         portIntonePlace = p
         ePlace += 1
-        cmdDelete = exec.Command("/bin/bash","-c", "add_port.sh",INFO.Serverport,INFO.Serverip)
         cmdDelete.Stdout = os.Stdout 
         cmdDelete.Stderr = os.Stderr
         cmdDelete.Start()
         cmdDelete.Wait()
+    } else {
+        cmdDelete = exec.Command("/bin/bash","-c", "add_port.sh",INFO.Serverport,INFO.Serverip)
+      }
     }
 	}
   cmdDelete.Stdout = os.Stdout 
