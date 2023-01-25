@@ -107,6 +107,7 @@ class Miney_Client(GridLayout):
             wid = self.btnarr[self.sel]
             wid.parent.remove_widget(wid)
             self.tag.remove(self.tag[self.sel])
+            self.btnarr.remove(wid)
             if self.i >= 0:
                 self.i-=1
                 self.sel=-1
