@@ -47,19 +47,13 @@ class Miney_Client(GridLayout):
     def syncOnclick(self,instance):
 
         self.sel = -1
-        if self.i != -1 :
-            for btn in  self.btnarr: 
-                if type(btn) == type (None) :
-                    break
-                wid = btn
-                wid.parent.remove_widget(wid)
-            response = requests.post('http://daegu.yjlee-dev.pe.kr:32000/request',json = {"username":self.username.text, "password":self.password.text}, timeout = 10).json()
-            print(response)
-            if len(response)==0 :
-                return
-            for resp in response:
-                self.i+=1
-                resp = json.loads(resp,strict=False)
+        response = requests.post('http://daegu.yjlee-dev.pe.kr:32000/request',json = {"username":self.username.text, "password":self.password.text}, timeout = 10).json()
+        print(response)
+        if len(response)==0 :
+            return
+        for resp in response:
+            resp = json.loads(resp,strict=False)
+            if resp not in self.tag:
                 self.tag.append(resp)
                 self.seltagArr.append(resp.get("tag"))
                 self.tmp = globals()['self.btn{}'.format(self.i)]=Button(text="Select "+ self.tag[self.i].get("servername")+":"+"(Port:" +self.tag[self.i].get("serverport")+")"+ " Now",size_hint=(.7,.7))
