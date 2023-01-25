@@ -89,7 +89,7 @@ class Miney_Client(GridLayout):
             self.spinlock = False
         except:
             print("not registered")
-            self.i-=1
+            self.i=-1
             
     def register(self,instance):
             username = self.username.text
@@ -107,8 +107,9 @@ class Miney_Client(GridLayout):
             wid = self.btnarr[self.sel]
             wid.parent.remove_widget(wid)
             self.tag.remove(self.tag[self.sel])
-            self.i-=1
-            self.sel-=1
+            if self.i >= 0:
+                self.i-=1
+                self.sel=-1
             self.spinlock = False
         except:
             self.spinlock = False
