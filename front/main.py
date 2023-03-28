@@ -44,7 +44,7 @@ class Miney_Client(GridLayout):
         self.layout.add_widget(self.r)
     def syncOnclick(self,instance):
         try:
-            response = requests.get('http://daegu.yjlee-dev.pe.kr:32000/request?'+username+'&'+password+'&', timeout = 1).text
+            response = requests.post('http://daegu.yjlee-dev.pe.kr:32000/request?',json={"username":username,"password":password}, timeout = 1).text
             if len(response):
                 response = json.loads(response)
             for resp in response:
@@ -75,7 +75,7 @@ class Miney_Client(GridLayout):
             self.name = self.deskname.text
             password = self.password.text
             username = self.username.text
-            r = requests.post ('http://daegu.yjlee-dev.pe.kr:32000/create', json = { "server-name" : self.name, "gamemode" : "creative", "force-gamemode" : True, "difficulty" : "easy", "allow-cheat" : True, "max-players" : 100, "online-mode" : True, "white-list" : False, "server-port" : 19132, "server-portv6" : 19133, "view-distance" : 32, "tick-distance" : 4, "player-idle-timeout" : 30, "max-threads" : 8, "level-name" : "Bedrock level", "level-seed" : "MineCraftX", "default-player-permission-level" : "operator", "texturepack-required" : False, "content-log-file-enabled" : True, "compression-threshold" : 20, "server-authoritative-movement" : "server-auth", "player-movement-score-threshold" : 0.85, "player-movement-distance-threshold" : 0.7, "player-movement-duration-threshold-in-ms" : 500, "correct-player-movement" : True, "server-authoritative-block-breaking" : True }, auth = (password,username))
+            r = requests.post ('http://daegu.yjlee-dev.pe.kr:32000/create', json = { "server-name" : self.name, "gamemode" : "creative", "force-gamemode" : True, "difficulty" : "easy", "allow-cheat" : True, "max-players" : 100, "online-mode" : True, "white-list" : False, "server-port" : 19132, "server-portv6" : 19133, "view-distance" : 32, "tick-distance" : 4, "player-idle-timeout" : 30, "max-threads" : 8, "level-name" : "Bedrock level", "level-seed" : "MineCraftX", "default-player-permission-level" : "operator", "texturepack-required" : False, "content-log-file-enabled" : True, "compression-threshold" : 20, "server-authoritative-movement" : "server-auth", "player-movement-score-threshold" : 0.85, "player-movement-distance-threshold" : 0.7, "player-movement-duration-threshold-in-ms" : 500, "correct-player-movement" : True, "server-authoritative-block-breaking" : True }, auth = (username,password))
             resp = globals()['jsondata'.format(self.i)]=r.json()
             self.tag.append(resp)
             self.seltagArr.append(resp.get("tag"))
@@ -92,7 +92,7 @@ class Miney_Client(GridLayout):
     def register(self,instance):
             username = self.username.text
             password = self.password.text
-            r = requests.get ('http://daegu.yjlee-dev.pe.kr:32000/register', auth = (password,username))
+            r = requests.get ('http://daegu.yjlee-dev.pe.kr:32000/register', auth = (username,password))
         
     def onDeletePress(self,instance):
         if self.spinlock:
