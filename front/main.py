@@ -44,13 +44,17 @@ class Miney_Client(GridLayout):
         self.layout.add_widget(self.r)
     def syncOnclick(self,instance):
         try:
+            password = self.password.text
+            username = self.username.text
             response = requests.post('http://daegu.yjlee-dev.pe.kr:32000/request?',json={"username":username,"password":password}, timeout = 1).text
             if len(response):
                 response = json.loads(response)
+            self.i=-1
             for resp in response:
                 self.i+=1
-                resp = str(resp)
                 resp = json.loads(resp,strict=False)
+                if resp in self.tag:
+                    continue
                 self.tag.append(resp)
                 self.seltagArr.append(resp.get("tag"))
                 self.tmp = globals()['self.btn{}'.format(self.i)]=Button(text="Select "+ self.tag[self.i].get("servername")+":"+"(Port:" +self.tag[self.i].get("serverport")+")"+ " Now",size_hint=(.7,.7))
@@ -59,8 +63,8 @@ class Miney_Client(GridLayout):
                 self.btnarr.append(self.tmp)
                 self.layout.add_widget(self.tmp)
                 self.btn_delete.bind(on_press=self.onDeletePress)
-        except:
-            print("no json")
+        except Exception as ex:
+            print("no json: ", ex)
 
     def onCreatePress(self,instance):
         try:
@@ -76,14 +80,6 @@ class Miney_Client(GridLayout):
             password = self.password.text
             username = self.username.text
             r = requests.post ('http://daegu.yjlee-dev.pe.kr:32000/create', json = { "server-name" : self.name, "gamemode" : "creative", "force-gamemode" : True, "difficulty" : "easy", "allow-cheat" : True, "max-players" : 100, "online-mode" : True, "white-list" : False, "server-port" : 19132, "server-portv6" : 19133, "view-distance" : 32, "tick-distance" : 4, "player-idle-timeout" : 30, "max-threads" : 8, "level-name" : "Bedrock level", "level-seed" : "MineCraftX", "default-player-permission-level" : "operator", "texturepack-required" : False, "content-log-file-enabled" : True, "compression-threshold" : 20, "server-authoritative-movement" : "server-auth", "player-movement-score-threshold" : 0.85, "player-movement-distance-threshold" : 0.7, "player-movement-duration-threshold-in-ms" : 500, "correct-player-movement" : True, "server-authoritative-block-breaking" : True }, auth = (username,password))
-            resp = globals()['jsondata'.format(self.i)]=r.json()
-            self.tag.append(resp)
-            self.seltagArr.append(resp.get("tag"))
-            self.tmp = globals()['self.btn{}'.format(self.i)]=Button(text="Select "+ self.tag[self.i].get("servername")+":"+"(Port:" +self.tag[self.i].get("serverport")+")"+ " Now",size_hint=(.7,.7))
-            self.ids["tag"]=self.seltagArr[self.i]
-            self.tmp.bind(on_press = self.onSelectPress)
-            self.btnarr.append(self.tmp)
-            self.layout.add_widget(self.tmp)
             self.spinlock = False
         except:
             print("not registered")
@@ -108,7 +104,8 @@ class Miney_Client(GridLayout):
             self.i-=1
             self.sel-=1
             self.spinlock = False
-        except:
+        except Exception as ex:
+            print(ex)
             self.spinlock = False
     def onSelectPress(self,instance):
             i = self.seltagArr.index(self.ids["tag"])
