@@ -46,7 +46,7 @@ class Miney_Client(GridLayout):
         try:
             password = self.password.text
             username = self.username.text
-            response = requests.post('http://daegu.yjlee-dev.pe.kr:32000/request?',json={"username":username,"password":password}, timeout = 1).text
+            response = requests.post('http://daegu.yjlee-dev.pe.kr:32000/request',json={"username":username,"password":password}, timeout = 1).text
             if len(response):
                 response = json.loads(response)
             self.i=-1
@@ -57,6 +57,7 @@ class Miney_Client(GridLayout):
                     continue
                 self.tag.append(resp)
                 self.seltagArr.append(resp.get("tag"))
+                print(resp.get("tag"))
                 self.tmp = globals()['self.btn{}'.format(self.i)]=Button(text="Select "+ self.tag[self.i].get("servername")+":"+"(Port:" +self.tag[self.i].get("serverport")+")"+ " Now",size_hint=(.7,.7))
                 self.ids["tag"]=self.seltagArr[self.i]
                 self.tmp.bind(on_press = self.onSelectPress)
