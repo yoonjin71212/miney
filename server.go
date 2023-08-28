@@ -41,8 +41,8 @@ var portInt int64 = 25563
 var portIntonePlace int64 = 25563
 var ctx context.Context
 var tag string
-var password string = "t"
-var ADMIN    string = "l"
+var password string = "e"
+var ADMIN    string = "e"
 var ADDR string = "http://daegu.yjlee-dev.pe.kr"
 
 type UserInfo struct {
