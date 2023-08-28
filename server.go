@@ -41,8 +41,8 @@ var portInt int64 = 25563
 var portIntonePlace int64 = 25563
 var ctx context.Context
 var tag string
-var password string = "a"
-var ADMIN    string = "y"
+var password string = "t"
+var ADMIN    string = "l"
 var ADDR string = "http://daegu.yjlee-dev.pe.kr"
 
 type UserInfo struct {
@@ -291,9 +291,6 @@ func CreateConfig (wr http.ResponseWriter , req *http.Request) {
   log.Println ("/container_creation.sh " + tag + " " + port)
   portprev = port
   bytesGenerated = Generate_ConfigFile (bytesGenerated)
-  if flag == true {
-  	flag = false
-  }
 
   TouchFile (mydir+"/properties/"+tag+".properties")
   file , _ := os.OpenFile ( mydir+"/properties/"+tag+".properties" , os.O_RDWR  , os.FileMode(0777))
@@ -343,6 +340,9 @@ func CreateConfig (wr http.ResponseWriter , req *http.Request) {
   string_Reply , err = json.Marshal (INFO)
 
 
+  if flag == true {
+  	flag = false
+  }
   wr.Write( string_Reply )
 }
 
