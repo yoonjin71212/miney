@@ -62,7 +62,7 @@ lxc file push -r /usr/local/bin/minecraft/miney.zip $TAG/
 lxc exec $TAG -- /bin/apt install -y unzip
 lxc exec $TAG -- /bin/unzip /miney.zip 
 lxc exec $TAG -- /usr/bin/mv    miney /minecraft
-lxc exec $TAG -- /bin/mkdir /minecraft/properties
+lxc exec $TAG -- /bin/mkdir /usr/local/bin/minecraft/properties
 touch /usr/local/bin/minecraft/container/$TAG
 echo $CONTAINER_IP > /usr/local/bin/minecraft/container/$TAG
 echo $TAG > /usr/local/bin/minecraft/container/latest_access
