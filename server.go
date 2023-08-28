@@ -41,8 +41,8 @@ var portInt int64 = 25563
 var portIntonePlace int64 = 25563
 var ctx context.Context
 var tag string
-var password string = "aa"
-var ADMIN    string = "aa"
+var password string = "a"
+var ADMIN    string = "y"
 var ADDR string = "http://daegu.yjlee-dev.pe.kr"
 
 type UserInfo struct {
@@ -267,6 +267,7 @@ func CreateConfig (wr http.ResponseWriter , req *http.Request) {
         return
     }
   if(flag) {
+      wr.Write([]byte("wait"))
       return
   }
   flag=true
