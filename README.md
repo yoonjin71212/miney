@@ -10,12 +10,11 @@ minecraft server management
 ##### Usage
 * make
 * ./initial_setup.sh
-* systemctl start --now mineserver
+* systemctl start --now miney
 ### Front-end Application
 #### Usage
-cd front
+cd app
 python3 main.py
-* You can build it by Buildozer.
 #### Requirements 
 * python3,requests,kivy
 
