@@ -1,8 +1,11 @@
 from kivy.app import App
+from kivy.uix.popup import Popup
+import time
 import ast
 import requests
 from kivy.uix.gridlayout import GridLayout
 import json
+import asyncio
 from kivy.uix.textinput import TextInput
 from functools import partial
 from kivy.uix.button import Button
@@ -11,12 +14,18 @@ from kivy.uix.boxlayout import BoxLayout
 
 
 class Miney_Client(GridLayout):
+
     def __init__(self, **kwargs):
         super(Miney_Client, self).__init__(**kwargs)
         self.padding=0
+        self.t=None
+        self.name = "MINEY"
+        self.username_s =""
+        self.password_s =""
         self.layout = BoxLayout(spacing=10, orientation = 'vertical',padding=10)
         self.rows = 2
         self.cols = 2
+        self.res = ""
         self.add_widget(self.layout)
         self.i = -1
         self.tag = []
@@ -67,24 +76,31 @@ class Miney_Client(GridLayout):
         except Exception as ex:
             print("no json: ", ex)
 
+    async def conCreate(self):
+        self.res = requests.post ('http://daegu.yjlee-dev.pe.kr:32000/create', json = { "server-name" : self.name, "gamemode" : "creative", "force-gamemode" : True, "difficulty" : "easy", "allow-cheat" : True, "max-players" : 100, "online-mode" : True, "white-list" : False, "server-port" : 19132, "server-portv6" : 19133, "view-distance" : 32, "tick-distance" : 4, "player-idle-timeout" : 30, "max-threads" : 8, "level-name" : "Bedrock level", "level-seed" : "MineCraftX", "default-player-permission-level" : "operator", "texturepack-required" : False, "content-log-file-enabled" : True, "compression-threshold" : 20, "server-authoritative-movement" : "server-auth", "player-movement-score-threshold" : 0.85, "player-movement-distance-threshold" : 0.7, "player-movement-duration-threshold-in-ms" : 500, "correct-player-movement" : True, "server-authoritative-block-breaking" : True }, auth = (self.username_s,self.password_s))
+        await asyncio.sleep(10)
+        return self.res
     def onCreatePress(self,instance):
+ 
+             
+        self.i+=1
+        self.name = self.deskname.text
+        self.password_s = self.password.text
+        self.username_s = self.username.text
+        self.spinlock = True
+        self.conCreate()
+        asyncio.run(self.conCreate())
+
         try:
-            if self.spinlock:
-                pass
-            if self.i>self.threshold:
-                print('No more space available here. Contact on yoonjin67@gmail.com')
-                self.spinlock = False
-                pass
-            self.i+=1
-            self.spinlock = True
-            self.name = self.deskname.text
-            password = self.password.text
-            username = self.username.text
-            r = requests.post ('http://daegu.yjlee-dev.pe.kr:32000/create', json = { "server-name" : self.name, "gamemode" : "creative", "force-gamemode" : True, "difficulty" : "easy", "allow-cheat" : True, "max-players" : 100, "online-mode" : True, "white-list" : False, "server-port" : 19132, "server-portv6" : 19133, "view-distance" : 32, "tick-distance" : 4, "player-idle-timeout" : 30, "max-threads" : 8, "level-name" : "Bedrock level", "level-seed" : "MineCraftX", "default-player-permission-level" : "operator", "texturepack-required" : False, "content-log-file-enabled" : True, "compression-threshold" : 20, "server-authoritative-movement" : "server-auth", "player-movement-score-threshold" : 0.85, "player-movement-distance-threshold" : 0.7, "player-movement-duration-threshold-in-ms" : 500, "correct-player-movement" : True, "server-authoritative-block-breaking" : True }, auth = (username,password))
-            self.spinlock = False
-        except:
+             if self.i>self.threshold:
+                 print('No more space available here. Contact on yoonjin67@gmail.com')
+                 self.spinlock = False
+                 pass
+        except Exception as ex:
+            print(ex)
             print("not registered")
             self.i-=1
+        self.spinLock = False
             
     def register(self,instance):
             username = self.username.text
