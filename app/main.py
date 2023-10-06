@@ -44,8 +44,15 @@ class Miney_Client(GridLayout):
         self.layout.add_widget(self.btn_start)
         self.btn_delete = Button(text="Delete Container",size_hint=(.7,.7))
         self.layout.add_widget(self.btn_delete)
+        self.btn_stop = Button(text="Stop Container",size_hint=(.7,.7))
+        self.layout.add_widget(self.btn_stop)
+        self.btn_start = Button(text="Start Container",size_hint=(.7,.7))
+        self.layout.add_widget(self.btn_start)
         self.spinlock = False
         self.btn_sync = Button(text="Sync Data",size_hint=(.7,.7))
+        self.btn_delete.bind(on_press=self.onDeletePressed)
+        self.btn_stop.bind(on_press=self.onStopPressed)
+        self.btn_start.bind(on_press=self.onStartPressed)
         self.btn_sync.bind(on_press=self.syncOnclick)
         self.layout.add_widget(self.btn_sync)
         self.r = Button(text="Register",size_hint=(.7,.7))
@@ -56,6 +63,10 @@ class Miney_Client(GridLayout):
             password = self.password.text
             username = self.username.text
             response = requests.post('http://daegu.yjlee-dev.pe.kr:32000/request',json={"username":username,"password":password}, timeout = 1).text
+            self.tag=[]
+            for btn in self.btnarr:
+                self.layout.remove_widget(btn)
+            self.btnarr=[]
             if len(response):
                 response = json.loads(response)
             self.i=-1
@@ -67,18 +78,18 @@ class Miney_Client(GridLayout):
                 self.tag.append(resp)
                 self.seltagArr.append(resp.get("tag"))
                 print(resp.get("tag"))
-                self.tmp = globals()['self.btn{}'.format(self.i)]=Button(text="Select "+ self.tag[self.i].get("servername")+":"+"(Port:" +self.tag[self.i].get("serverport")+")"+ " Now",size_hint=(.7,.7))
+                self.tmp = globals()['self.btn{}'.format(self.i)]=Button(text="Select "+ self.seltagArr[self.i]+":"+"(Port:" +self.tag[self.i].get("serverport")+")"+ " Now",size_hint=(.7,.7))
                 self.ids["tag"]=self.seltagArr[self.i]
                 self.tmp.bind(on_press = self.onSelectPress)
                 self.btnarr.append(self.tmp)
                 self.layout.add_widget(self.tmp)
-                self.btn_delete.bind(on_press=self.onDeletePress)
+                self.btn_delete.bind(on_press=self.onDeletePressed)
         except Exception as ex:
             print("no json: ", ex)
 
     async def conCreate(self):
+        await asyncio.sleep(8)
         self.res = requests.post ('http://daegu.yjlee-dev.pe.kr:32000/create', json = { "server-name" : self.name, "gamemode" : "creative", "force-gamemode" : True, "difficulty" : "easy", "allow-cheat" : True, "max-players" : 100, "online-mode" : True, "white-list" : False, "server-port" : 19132, "server-portv6" : 19133, "view-distance" : 32, "tick-distance" : 4, "player-idle-timeout" : 30, "max-threads" : 8, "level-name" : "Bedrock level", "level-seed" : "MineCraftX", "default-player-permission-level" : "operator", "texturepack-required" : False, "content-log-file-enabled" : True, "compression-threshold" : 20, "server-authoritative-movement" : "server-auth", "player-movement-score-threshold" : 0.85, "player-movement-distance-threshold" : 0.7, "player-movement-duration-threshold-in-ms" : 500, "correct-player-movement" : True, "server-authoritative-block-breaking" : True }, auth = (self.username_s,self.password_s))
-        await asyncio.sleep(10)
         return self.res
     def onCreatePress(self,instance):
  
@@ -88,8 +99,9 @@ class Miney_Client(GridLayout):
         self.password_s = self.password.text
         self.username_s = self.username.text
         self.spinlock = True
-        self.conCreate()
-        asyncio.run(self.conCreate())
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(self.conCreate())
+        loop.close()
 
         try:
              if self.i>self.threshold:
@@ -107,14 +119,27 @@ class Miney_Client(GridLayout):
             password = self.password.text
             r = requests.get ('http://daegu.yjlee-dev.pe.kr:32000/register', auth = (username,password))
         
-    def onDeletePress(self,instance):
+    def deleteStopStartTask(self,st):
+        r = requests.post('http://daegu.yjlee-dev.pe.kr:32000/'+st, data=self.seltagArr[self.sel])
+    def onStartPressed(self,instance):
+        try:
+            self.deleteStopStartTask('start')
+        except:
+            print('error')
+    def onStopPressed(self,instance):
+        try:
+            self.deleteStopStartTask('stop')
+        except:
+            print('error')
+
+    def onDeletePressed(self,instance):
         if self.spinlock:
             return
         if self.i==-1:
             return
         try:
             self.spinlock = True
-            r = requests.post('http://daegu.yjlee-dev.pe.kr:32000/delete', data=self.seltagArr[self.sel])
+            self.deleteStopStartTask('delete')
             wid = self.btnarr[self.sel]
             wid.parent.remove_widget(wid)
             self.tag.remove(self.tag[self.sel])
