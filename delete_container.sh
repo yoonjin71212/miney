@@ -1,8 +1,8 @@
 #!/bin/bash
 TAG="$1"
 source /root/.bashrc
-lxc stop $(lxc list | awk '{print $2}' | grep --invert-match NAME | grep $TAG)
-lxc delete $(lxc list | awk '{print $2}' | grep --invert-match NAME | grep $TAG)
+lxc stop $TAG
+lxc delete $TAG
 rm -rf /usr/lobal/bin/minecraft/ontainer/minecraft-*
 rm -rf /usr/local/bin/minecraft/properties/minecraft-*
 cat drop_all.props | mongosh --port 27017

@@ -7,8 +7,8 @@ db.getCollectionNames()
   });
 db.createUser(
   {
-    user: "aa",
-    pwd: "aa", 
+    user: "a",
+    pwd: "a", 
     roles: [
 			{ role: 
 				"readWrite",

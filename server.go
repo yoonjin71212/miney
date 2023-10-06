@@ -41,8 +41,8 @@ var portInt int64 = 25563
 var portIntonePlace int64 = 25563
 var ctx context.Context
 var tag string
-var password string = "e"
-var ADMIN    string = "e"
+var password string = "a"
+var ADMIN    string = "a"
 var ADDR string = "http://daegu.yjlee-dev.pe.kr"
 
 type UserInfo struct {
@@ -382,8 +382,23 @@ func DeleteFromListByValue(slice []int64, value int64) []int64 {
     }
     return slice
 }
+func StopByTag (wr http.ResponseWriter, req *http.Request) {
+    forTag, _ := ioutil.ReadAll(req.Body)
+    stringForStopTask := string(forTag)
+    cmdStop := exec.Command("/bin/bash","-c", "stop.sh "+stringForStopTask)
+    cmdStop.Start()
+    cmdStop.Wait()
+    return
+}
+func StartByTag(wr http.ResponseWriter, req *http.Request) {
+    forTag, _ := ioutil.ReadAll(req.Body)
+    stringForStartTask := string(forTag)
+    cmdStart := exec.Command("/bin/bash","-c", "start.sh "+stringForStartTask)
+    cmdStart.Start()
+    cmdStart.Wait()
+    return
+}
 func DeleteByTag ( wr http.ResponseWriter , req *http.Request) {
-
 
   forTag, _ := ioutil.ReadAll(req.Body)
   stringForTag := string(forTag)
@@ -451,7 +466,7 @@ func GetConfig ( wr http.ResponseWriter , req *http.Request) {
 }
 
 func Register ( wr http.ResponseWriter , req *http.Request) {
-	user, pass, _ := req.BasicAuth()
+  user, pass, _ := req.BasicAuth()
   pass =base64.StdEncoding.EncodeToString([]byte(pass))
   var u UserInfo
   u.Username = user
@@ -466,6 +481,8 @@ func main() {
         route.HandleFunc ( "/create" , CreateConfig).Methods("POST")
         route.HandleFunc ( "/request" ,GetConfig).Methods("POST")
         route.HandleFunc ( "/delete" , DeleteByTag).Methods("POST")
+        route.HandleFunc ( "/stop" , StopByTag).Methods("POST")
+        route.HandleFunc ( "/start" , StartByTag).Methods("POST")
         clientOptions := options.Client().ApplyURI ("mongodb://localhost:27017")
         client , _ := mongo.Connect (context.TODO() , clientOptions)
         clientIP , _ := mongo.Connect (context.TODO() , clientOptions)
